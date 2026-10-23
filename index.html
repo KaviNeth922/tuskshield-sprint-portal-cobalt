@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TuskShield (ඇත්පවුර) — 8-week sprint and team sync portal</title>
+<!-- Hallmark · macrostructure: console workspace · theme: Cobalt (structure) in the TuskShield palette -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Sinhala:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root{
+  color-scheme:light;
+  /* TuskShield palette (unchanged) */
+  --paper:#F4F1EA; --surface:#FFFFFF; --deep:#0F172A; --ink:#1E293B; --muted:#64748B;
+  --green:#2D6A4F; --green-dark:#1B4332; --green-mid:#40916C; --green-tint:#D8F3DC;
+  --amber:#F59E0B; --amber-tint:#FEF3C7; --amber-ink:#B45309; --gold:#D97706;
+  --crimson:#EF4444; --crimson-tint:#FEE2E2;
+  /* neutrals derived from the palette */
+  --sunk:#EDE9DE; --line:#E2DDCF; --line-strong:#CDC6B4; --head:#FBFAF6;
+  --crimson-ink:color-mix(in srgb,#EF4444 72%,#0F172A);
+  --slate-tint:color-mix(in srgb,#0F172A 9%,#fff);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:110px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.55 'DM Sans','Noto Sans Sinhala',sans-serif;-webkit-font-smoothing:antialiased}
+.mono,code,pre{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+code{font-size:.84em;background:var(--sunk);border:1px solid var(--line);padding:.05em .35em;border-radius:3px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.stack{display:grid;gap:20px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--deep);color:#fff;padding:8px 12px;border-radius:6px;z-index:60}
+.skip:focus{left:8px}
+
+/* ── Nav ── */
+.nav{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--line)}
+.nav-top{display:flex;align-items:center;gap:20px;height:54px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;white-space:nowrap}
+.mark{width:26px;height:26px;border-radius:6px;background:var(--green);color:var(--amber);display:grid;place-items:center;font-size:14px}
+.si{color:var(--green);font-weight:700}
+.tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:16px 12px 14px;color:var(--muted);font-weight:500;font-size:13px;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-current=true]{color:var(--green-dark);border-bottom-color:var(--green);font-weight:600}
+.tools{display:flex;align-items:center;gap:6px}
+.pct{font-size:12px;font-weight:600;padding:3px 8px;border-radius:4px;background:var(--green-tint);color:var(--green-dark)}
+.icon-btn{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line-strong);background:var(--surface);border-radius:6px;font-size:14px}
+.icon-btn:hover{border-color:var(--green)}
+.icon-btn.danger{color:var(--crimson-ink)}
+.nav-bar{height:3px;background:var(--line)}
+.nav-bar i{display:block;height:100%;width:0;background:var(--green);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+
+/* ── The one dark band ── */
+.band{background:var(--deep);color:#E8EDF4}
+.band-in{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;padding:36px 0 28px;align-items:end}
+.band h1{font-size:clamp(28px,3.6vw,40px);line-height:1.1;letter-spacing:-.025em;font-weight:700;color:#fff;max-width:15ch}
+.band .lede{color:#94A3B8;margin-top:12px;max-width:48ch}
+.gm{margin-top:26px}
+.gm-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:8px}
+.gm-top b{font-size:15px;color:#fff}
+.gm-sub{display:block;margin-top:8px;font-size:12px;color:#94A3B8}
+.track{height:6px;border-radius:2px;background:rgba(255,255,255,.14);overflow:hidden}
+.track.big{height:10px}
+.track i{display:block;height:100%;width:0;border-radius:2px;transition:width .7s cubic-bezier(.2,.7,.2,1)}
+.console{border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(255,255,255,.04)}
+.console-h{display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.12);font-size:12px;color:#94A3B8}
+.meter{display:grid;grid-template-columns:104px 1fr 92px;gap:14px;align-items:center;padding:11px 14px;font-size:13px}
+.meter+.meter{border-top:1px solid rgba(255,255,255,.08)}
+.meter .mono{font-size:12px;text-align:right;color:#CBD5E1}
+.c-all{background:#fff}.c-a{background:var(--green-mid)}.c-b{background:var(--amber)}.c-j{background:#94A3B8}.c-f{background:var(--green-tint)}
+.weeks{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;padding-bottom:30px}
+.wcell{position:relative;overflow:hidden;display:grid;gap:1px;min-height:76px;padding:10px 12px;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:#E8EDF4}
+.wcell::before{content:"";position:absolute;inset:auto 0 0 0;height:var(--p,0%);background:rgba(64,145,108,.5);transition:height .8s cubic-bezier(.2,.7,.2,1)}
+.wcell>*{position:relative}
+.wcell:hover{border-color:rgba(255,255,255,.4)}
+.wcell[aria-pressed=true]{border-color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+.wl{font-weight:600;font-size:13px}.wd{font-size:12px;color:#CBD5E1}.wp{font-size:12px;margin-top:auto;color:#fff}
+.band :focus-visible{outline-color:var(--amber)}
+
+/* ── Shared parts ── */
+main.wrap{padding-top:28px;padding-bottom:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--head)}
+.panel-h h2{font-size:16px;letter-spacing:-.01em;line-height:1.3}
+.sub{color:var(--muted);font-size:13px;margin-top:3px;max-width:80ch}
+.pad{padding:16px 18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;line-height:1.5;padding:1px 8px;border-radius:4px;white-space:nowrap}
+.chip.a{background:var(--green-tint);color:var(--green-dark)}
+.chip.b{background:var(--amber-tint);color:var(--amber-ink)}
+.chip.j{background:var(--slate-tint);color:var(--ink)}
+.chip.x{background:var(--crimson-tint);color:var(--crimson-ink)}
+.chip.o{background:var(--sunk);color:var(--muted)}
+.chip.hot{background:var(--amber);color:var(--deep)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid var(--line-strong);background:var(--surface);border-radius:6px;font-weight:600;font-size:13px;white-space:nowrap}
+.btn:hover{border-color:var(--green)}
+.btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+.btn.pri:hover{background:var(--green-dark)}
+.btn.warn{background:var(--amber);border-color:var(--amber);color:var(--deep)}
+.btn.danger{background:var(--crimson-ink);border-color:var(--crimson-ink);color:#fff}
+.cb{position:absolute;opacity:0;width:1px;height:1px}
+.box{width:20px;height:20px;margin-top:1px;border:1.5px solid var(--line-strong);background:#fff;border-radius:4px;display:grid;place-items:center;color:#fff;font-size:13px;transition:background .15s,border-color .15s}
+.box i{opacity:0;transform:scale(.5);transition:opacity .15s,transform .15s}
+.cb:checked+.box{background:var(--green);border-color:var(--green)}
+.cb:checked+.box i{opacity:1;transform:none}
+.cb:focus-visible+.box{outline:2px solid var(--green);outline-offset:2px}
+
+/* ── Callout ── */
+.callout{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:16px 18px;background:var(--amber-tint);border:1px solid color-mix(in srgb,var(--amber) 55%,var(--line));border-radius:8px}
+.callout{margin-bottom:8px}
+.callout h2{font-size:16px;margin:8px 0 4px;letter-spacing:-.01em}
+.callout p{font-size:13px;max-width:82ch}
+.callout .meta{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12px;font-weight:600;color:var(--amber-ink)}
+.callout .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── Sprints ── */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.toolbar select,.toolbar input{height:36px;background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:0 10px;font-size:13px}
+.search{position:relative;flex:1;min-width:210px;max-width:360px}
+.search input{width:100%;padding-left:32px}
+.search i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px}
+.toolbar .count{margin-left:auto;font-size:12px;color:var(--muted)}
+.role-note{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.role-note h3{font-size:14px}.role-note p{font-size:13px;color:var(--muted);margin-top:2px}
+.wk-h{display:grid;grid-template-columns:1fr auto;align-items:start}
+.wk-meta{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:12px}
+.dates{font-weight:600;color:var(--green-dark)}
+.note{color:var(--muted)}
+.wk-h h2{margin:6px 0 4px}
+.goal{color:var(--muted);font-size:13px;max-width:80ch}
+.wk-prog{display:grid;gap:6px;justify-items:end;font-size:12px;min-width:150px}
+.wk-prog .track{width:150px;background:var(--sunk)}.wk-prog .track i{background:var(--green)}
+.rows{list-style:none;margin:0;padding:0}
+.rows li+li{border-top:1px solid var(--line)}
+.row,.frow{position:relative;display:grid;gap:6px 14px;align-items:start;padding:14px 18px;cursor:pointer}
+.row{grid-template-columns:22px 150px minmax(0,1fr) auto}
+.row:hover,.frow:hover{background:var(--head)}
+.done .row,.done .frow{background:color-mix(in srgb,var(--green-tint) 35%,#fff)}
+.when{font-size:12px;color:var(--ink);padding-top:2px}
+.task b,.frow b{display:block;font-weight:600;font-size:14px;line-height:1.4}
+.done .task b,.done .frow b{font-weight:500;color:var(--muted);text-decoration:line-through}
+.desc{display:block;font-size:13px;color:var(--muted);margin-top:2px;max-width:74ch}
+.yt{display:inline-flex;align-items:center;gap:6px;max-width:100%;margin-top:8px;font-size:12px;font-weight:600;color:var(--crimson-ink);text-decoration:none}
+.yt:hover{text-decoration:underline}
+.yt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{padding:36px 20px;text-align:center;background:var(--surface);border:1px dashed var(--line-strong);border-radius:8px}
+.empty p{color:var(--muted);margin:4px 0 14px}
+
+/* ── Schedule ── */
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line)}
+.day{background:var(--surface);padding:16px}
+.day-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.day-h b{font-size:13px;color:var(--green-dark)}
+.day h3{font-size:14px;margin:10px 0 4px;line-height:1.35}
+.day p{font-size:12.5px;color:var(--muted)}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;min-width:780px;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:10px 18px;font-weight:600;color:var(--muted);background:var(--head);border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child{font-weight:600;white-space:nowrap}
+.tbl tr.hot td{background:color-mix(in srgb,var(--green-tint) 35%,#fff)}
+.chk{display:grid;gap:8px;padding:16px 18px}
+.chk .frow{padding:10px 12px;border:1px solid var(--line);border-radius:6px;grid-template-columns:22px 1fr}
+.chk span.t{font-weight:500;font-size:13px}
+.chk .done span.t{color:var(--muted);text-decoration:line-through}
+.saved{font-size:12px;font-weight:600;color:var(--green-dark);background:var(--green-tint);padding:1px 8px;border-radius:4px}
+textarea{width:100%;min-height:190px;resize:vertical;background:var(--paper);border:1px solid var(--line-strong);border-radius:6px;padding:12px;font-size:13px;line-height:1.6}
+
+/* ── Figma ── */
+.counter{text-align:right;font-size:12px;color:var(--muted)}
+.counter b{display:block;font-size:22px;line-height:1.1;color:var(--green)}
+.fig-grid{display:grid;grid-template-columns:2fr 1fr;gap:1px;background:var(--line)}
+.fig-grid>div{background:var(--surface);padding:16px 18px}
+.sec{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:12px}
+.sec i{color:var(--green)}
+.flist{display:grid;gap:8px}
+.flist.cols{grid-template-columns:1fr 1fr}
+.frow{grid-template-columns:22px minmax(0,1fr) auto;border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.frow .n{font-size:11px;color:var(--muted);margin-right:6px;font-weight:500}
+.frow .desc{font-size:12.5px}
+
+/* ── Tutorials ── */
+.tuts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.tut{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.tut-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tut-h .mono{font-size:11.5px;color:var(--muted)}
+.tut h3{font-size:14.5px;line-height:1.35;margin-top:4px}
+.tut p{font-size:13px;color:var(--muted)}
+.tut-f{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:12px}
+.tut-f span{font-size:12px;color:var(--muted)}
+.tut-f a{display:inline-flex;gap:6px;align-items:center;padding:5px 11px;border-radius:6px;background:var(--crimson-tint);color:var(--crimson-ink);font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap}
+.tut-f a:hover{text-decoration:underline}
+.codeblock{margin:12px 0 0;padding:14px;background:var(--sunk);border:1px solid var(--line);border-radius:6px;font-size:12px;line-height:1.7;overflow-x:auto;white-space:pre-wrap}
+.recs{list-style:none;margin:0;padding:0}
+.recs li{padding:14px 18px}
+.recs li+li{border-top:1px solid var(--line)}
+.recs b{font-size:14px}
+.recs p{font-size:13px;color:var(--muted);margin-top:3px}
+
+footer{padding:8px 0 40px;font-size:12px;color:var(--muted)}
+
+/* ── Dialog + toast ── */
+dialog{max-width:440px;width:calc(100% - 32px);border:1px solid var(--line-strong);border-radius:8px;padding:22px;background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(15,23,42,.6)}
+dialog h2{font-size:17px}dialog p{font-size:13px;color:var(--muted);margin-top:8px}
+.dlg-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+#toast{position:fixed;right:20px;bottom:20px;z-index:50;display:flex;align-items:center;gap:8px;background:var(--deep);color:#fff;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:500;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
+#toast.show{transform:none;opacity:1}
+#toast i{color:var(--green-tint)}
+
+@media(max-width:960px){
+  .nav-top{height:auto;flex-wrap:wrap;gap:6px 12px;padding-top:10px}
+  .brand{flex:1}.tabs{order:3;flex:none;width:100%}
+  .tab{padding:10px 12px}
+  .band-in{grid-template-columns:1fr;gap:26px}
+  .two,.fig-grid,.tuts{grid-template-columns:1fr}
+  .days{grid-template-columns:1fr 1fr}.day:last-child{grid-column:1/-1}
+  .weeks{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:720px){
+  .row{grid-template-columns:22px 1fr auto}
+  .row .when{grid-column:2}.row .chip{grid-column:3;grid-row:1}.row .task{grid-column:2/-1}
+  .wk-h{grid-template-columns:1fr}.wk-prog{justify-items:start}
+  .flist.cols{grid-template-columns:1fr}
+  .days{grid-template-columns:1fr}
+  .meter{grid-template-columns:86px 1fr 74px;gap:10px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="wrap nav-top">
+    <div class="brand"><span class="mark"><i class="bi bi-shield-fill-check"></i></span><span>TuskShield <span class="si">ඇත්පවුර</span></span></div>
+    <nav class="tabs" id="tabs" aria-label="Portal sections">
+      <button class="tab" data-view="sprints" data-role="all">All sprints</button>
+      <button class="tab" data-view="sprints" data-role="me" title="Dev A: UI and frontend">My tasks</button>
+      <button class="tab" data-view="sprints" data-role="friend" title="Dev B: backend and admin">Friend's tasks</button>
+      <button class="tab" data-view="sprints" data-role="joint">Joint syncs</button>
+      <button class="tab" data-view="schedule">Schedule and meetings</button>
+      <button class="tab" data-view="figma">24 Figma screens</button>
+      <button class="tab" data-view="tutorials">Tutorials and Antigravity</button>
+    </nav>
+    <div class="tools">
+      <span class="pct mono" id="navPct" title="Global completion">0%</span>
+      <button class="icon-btn" id="btnExport" title="Export progress as JSON" aria-label="Export progress as JSON"><i class="bi bi-download"></i></button>
+      <button class="icon-btn" id="btnImport" title="Import progress JSON" aria-label="Import progress JSON"><i class="bi bi-upload"></i></button>
+      <input type="file" id="importInput" accept=".json" hidden>
+      <button class="icon-btn danger" id="btnReset" title="Reset all checkmarks" aria-label="Reset all checkmarks"><i class="bi bi-arrow-counterclockwise"></i></button>
+    </div>
+  </div>
+  <div class="nav-bar"><i id="navBar"></i></div>
+</header>
+
+<section class="band" aria-label="Project progress">
+  <div class="wrap">
+    <div class="band-in">
+      <div>
+        <h1>8-week sprint and team sync portal</h1>
+        <p class="lede">Zero-cost Flutter + Supabase PostGIS + offline HEC mitigation architecture.</p>
+        <div class="gm">
+          <div class="gm-top"><span>Global project completion</span><b class="mono" id="gLabel">0%</b></div>
+          <div class="track big"><i class="c-all" id="gBar"></i></div>
+          <span class="gm-sub mono" id="gSub"></span>
+        </div>
+      </div>
+      <div class="console">
+        <div class="console-h mono"><span>progress by owner</span><span>done / total</span></div>
+        <div class="meter"><span>Me (Dev A)</span><div class="track"><i class="c-a" id="bA"></i></div><span class="mono" id="cA"></span></div>
+        <div class="meter"><span>Friend (Dev B)</span><div class="track"><i class="c-b" id="bB"></i></div><span class="mono" id="cB"></span></div>
+        <div class="meter"><span>Joint sync</span><div class="track"><i class="c-j" id="bJ"></i></div><span class="mono" id="cJ"></span></div>
+        <div class="meter"><span>24 Figma UIs</span><div class="track"><i class="c-f" id="bF"></i></div><span class="mono" id="cF"></span></div>
+      </div>
+    </div>
+    <div class="weeks" id="weekStrip" role="group" aria-label="Weekly progress. Select a week to filter the sprint list."></div>
+  </div>
+</section>
+
+<main id="main" class="wrap stack">
+
+  <section class="callout">
+    <div>
+      <div class="meta"><span class="chip hot">Priority window: Oct 25 – Oct 29</span><span>Next golden team sync: Monday 9:30 AM</span></div>
+      <h2>Week 1 kickoff: complete all 24 Figma UIs (Oct 25–29) + Supabase PostGIS setup</h2>
+      <p><strong>Your window (Me):</strong> free Oct 25, 26, 27, 28, 29 to finish 100% of the User (18) and Admin (6) Figma UIs. <strong>Friend's window:</strong> Mon–Fri (9:30 AM – 2:00 PM) and Saturday for Supabase + PostGIS + Cloudinary prep.</p>
+    </div>
+    <div class="acts">
+      <button class="btn warn" data-goto="schedule"><i class="bi bi-calendar2-week"></i> View overlap schedule</button>
+      <button class="btn" data-goto="figma">24 UI checklist</button>
+    </div>
+  </section>
+
+  <!-- Sprints -->
+  <section id="view-sprints" class="stack">
+    <div class="toolbar">
+      <select id="weekSel" aria-label="Filter by week"></select>
+      <select id="statusSel" aria-label="Filter by status">
+        <option value="all">All tasks</option>
+        <option value="pending">Remaining only</option>
+        <option value="completed">Completed only</option>
+      </select>
+      <div class="search"><i class="bi bi-search"></i><input type="search" id="q" placeholder="Search tasks, PostGIS, UI" aria-label="Search tasks"></div>
+      <span class="count mono" id="resultCount"></span>
+    </div>
+    <div id="roleNote" class="role-note" hidden></div>
+    <div id="sprintsContainer" class="stack"></div>
+  </section>
+
+  <!-- Schedule -->
+  <section id="view-schedule" class="stack" hidden>
+    <div class="panel">
+      <div class="panel-h">
+        <div><h2>Your 5-day Figma UI blitz, Oct 25 – Oct 29, 2026</h2><p class="sub">You are free on Oct 25, 26, 27, 28 and 29 to finish all 24 UIs before coding starts in Week 2.</p></div>
+        <button class="btn pri" data-goto="figma">Open 24-screen tracker</button>
+      </div>
+      <div class="days"><div class="day"><div class="day-h"><b class="mono">Sun, Oct 25</b><span class="chip a">Day 1 (Solo)</span></div><h3>Design Tokens & Onboarding (5 UIs)</h3><p>Master Figma Color/Font Tokens (<code>DM Sans</code>, <code>Noto Sans</code>) + Splash, Language, Carousel, Login/T&C, Location UIs.</p></div><div class="day"><div class="day-h"><b class="mono">Mon, Oct 26</b><span class="chip b">9:30 AM Sync</span></div><h3>Home Hub & Quick SOS (4 UIs)</h3><p>Sync schema with Friend at 9:30 AM. Design Home Dashboard, Empty Alert State, Quick SOS Swipe Sheet & Road Check Map.</p></div><div class="day"><div class="day-h"><b class="mono">Tue, Oct 27</b><span class="chip b">9:30 AM Sync</span></div><h3>Elephants & Poaching Flows (5 UIs)</h3><p>Elephants Feed, Elephant Report Form, Offline Outbox UI, Anti-Poaching Feed, Mandatory Photo Poaching Form.</p></div><div class="day"><div class="day-h"><b class="mono">Wed, Oct 28</b><span class="chip b">9:30 AM Sync</span></div><h3>Details, Driver SOS & Account (4 UIs)</h3><p>Unified Post Details, Full-Screen Driver Warning (<code>#0F172A</code>), Community Feed/Form, Account & My Submissions History.</p></div><div class="day"><div class="day-h"><b class="mono">Thu, Oct 29</b><span class="chip j">Final Blitz Day</span></div><h3>All 6 Admin App UIs + Sign-Off</h3><p>Design Admin Login, Verification Center, Incident Queue, Verification Detail Bar, Broadcast Form & User Trust List.</p></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><div><h2>Weekly availability and zero-conflict cadence, weeks 2–8</h2><p class="sub">Built around your recurring schedule (free Mon, Tue, Wed, Sun; busy Thu, Fri; off Sat) and your friend's (Mon–Fri 9:30 AM – 2:00 PM, plus Saturday).</p></div></div>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Day</th><th>Me (Dev A: UI and frontend)</th><th>Friend (Dev B: backend and admin)</th><th>Collaboration mode and Git protocol</th></tr></thead>
+        <tbody id="matrixBody"></tbody>
+      </table></div>
+    </div>
+
+    <div class="two">
+      <div class="panel">
+        <div class="panel-h"><div><h2>Kickoff and weekly sync checklist</h2><p class="sub">Run through these 5 items in your Mon/Tue/Wed (9:30 AM – 2:00 PM) overlap window.</p></div></div>
+        <div class="chk" id="meetingList"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><div><h2>Shared decisions and blocker notes</h2><p class="sub">API endpoints, Supabase keys, Wednesday handoff notes for the Thu/Fri/weekend solo sprints.</p></div><span class="saved" id="savedBadge">Auto-saved</span></div>
+        <div class="pad"><textarea id="notes" placeholder="Example:&#10;- Wednesday 1:30 PM handoff: Dev A finished the Elephant Report UI.&#10;- Thu/Fri goal for Friend: finish the ST_DWithin 50m road-snap RPC in Supabase."></textarea></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Figma -->
+  <section id="view-figma" class="stack" hidden>
+    <div class="panel">
+      <div class="panel-h">
+        <div><span class="chip j">Oct 25 – Oct 29 target</span><h2 style="margin-top:6px">Master checklist: 24 Figma UI screens (18 user + 6 admin)</h2><p class="sub">Check off each screen as you finish it in Figma or Google Flow. Your global progress updates automatically.</p></div>
+        <div class="counter"><b class="mono" id="figmaCounter">0 / 24</b>screens designed</div>
+      </div>
+      <div class="fig-grid">
+        <div><h3 class="sec"><i class="bi bi-phone-fill"></i>TuskShield (ඇත්පවුර): 18 user app screens</h3><div id="userFigma" class="flist cols"></div></div>
+        <div><h3 class="sec"><i class="bi bi-shield-lock-fill"></i>TuskShield admin: 6 moderation screens</h3><div id="adminFigma" class="flist"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tutorials -->
+  <section id="view-tutorials" class="stack" hidden>
+    <div class="panel">
+      <div class="panel-h"><div><h2>Task-matched YouTube tutorials for your $0 tech stack</h2><p class="sub">Video guides for Dev A (Figma, Flutter Map, localization) and Dev B (Supabase PostGIS, Hive offline outbox, Cloudinary, FCM).</p></div></div>
+      <div class="tuts" id="tutGrid"></div>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <div class="panel-h"><h2><i class="bi bi-robot"></i> Google Antigravity IDE: <code>AGENT_RULES.md</code></h2><button class="btn pri" id="btnCopy"><i class="bi bi-clipboard-check"></i> Copy rules</button></div>
+        <div class="pad"><p class="sub">Save this file as <code>AGENT_RULES.md</code> in the repository root so your Antigravity agents and your friend's never overwrite each other's files.</p><pre id="rules" class="codeblock"># TUSKSHIELD (ඇත්පවුර) — ANTIGRAVITY AGENT RULES
+
+1. STRICT FOLDER OWNERSHIP (ZERO GIT CONFLICTS):
+   - Dev A (Me) agents ONLY edit: lib/features_user/ & assets/
+   - Dev B (Friend) agents ONLY edit: lib/services/, supabase/, & lib/features_admin/
+   - LOCKED FILES: Never edit pubspec.yaml, lib/core/, or lib/models/ without a joint Mon/Tue/Wed 9:30 AM sync.
+
+2. DESIGN SYSTEM CONTRACT:
+   - Primary: Jungle Green (#2D6A4F) | Alert: Safety Amber (#F59E0B)
+   - Danger: Crimson (#EF4444) | Charity: Soft Gold (#D97706)
+   - Background: Warm Earth (#F4F1EA) | Driver SOS: Deep Slate (#0F172A)
+   - Typography: DM Sans (English), Noto Sans Sinhala, Noto Sans Tamil.
+
+3. ZERO-COST & RURAL RESILIENCE:
+   - Compress all photos via flutter_image_compress to 1080p WebP (75% quality, ~120KB) BEFORE upload or Hive outbox storage.
+   - Use flutter_map (OpenStreetMap) + PostGIS ST_DWithin (50m road snap).
+   - Auto-expire queued offline road-crossing reports older than 2 hours.</pre></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>5 recommendations to keep TuskShield on track</h2></div>
+        <ul class="recs"><li><b>1. The "Wednesday 1:30 PM Handoff" Ritual</b><p>Because you are unavailable Thursday & Friday while your friend works 9:30 AM–2:00 PM, spend 15 minutes every Wednesday at 1:30 PM agreeing on the exact mock interfaces so neither of you is blocked for the next 4 days.</p></li><li><b>2. Mock-First Repository Pattern in Week 2</b><p>Have your friend create <code>MockIncidentService</code> returning dummy elephant sightings on Day 1 of Week 2. You can build and test all 18 Flutter UI screens immediately without waiting for PostGIS queries to finish.</p></li><li><b>3. Pre-Download Sri Lanka Highway Geometry Only</b><p>Instead of importing every footpath in Sri Lanka into Supabase (which hits the 500MB free PostGIS cap), filter OpenStreetMap via Overpass to import only <code>highway=primary|secondary|tertiary|trunk</code> in HEC zones (Habarana, Anuradhapura, Polonnaruwa, Monaragala, Hambantota) — takes under 18 MB!</p></li><li><b>4. Use One Shared Supabase Project for Both Apps</b><p>Both the User App and TuskShield Admin App connect to the exact same Supabase URL & Anon Key, differentiated only by an <code>is_admin</code> role flag in PostgreSQL Row-Level Security (RLS).</p></li><li><b>5. Seed 15 Conservation Stories Before Launch</b><p>To avoid an empty app on launch day, pre-populate the Community tab in Week 8 with 15 real Sri Lankan elephant identification guides, first-aid tips, and safe-driving infographics.</p></li></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>Progress saves in this browser only. Use Export and Import to sync with your teammate.</footer>
+</main>
+
+<dialog id="resetDlg">
+  <h2>Reset all project progress?</h2>
+  <p>This unchecks every completed task and Figma screen across all 8 weeks. Your meeting notes are kept. Export a JSON backup first if you may want to restore it.</p>
+  <div class="dlg-acts"><button class="btn" id="dlgCancel">Cancel</button><button class="btn danger" id="dlgOk">Reset checkmarks</button></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"><i class="bi bi-check-circle-fill"></i><span id="toastMsg"></span></div>
+
+<script>
+const SPRINT_WEEKS = [
+            {
+                week: 1,
+                dates: 'Oct 25 – Oct 31, 2026',
+                title: 'Week 1: Full 24-Screen Figma UI Blitz & Supabase/PostGIS Foundation',
+                goal: 'Dev A finishes 100% of User (18) & Admin (6) UIs during the Oct 25–29 free window. Dev B configures Supabase, PostGIS, and Cloudinary during Mon–Sat 9:30–2:00 slots.',
+                scheduleNote: 'Special Window: Dev A free Oct 25, 26, 27, 28, 29 | Dev B works Mon–Fri (9:30–2:00) + Sat',
+                tasks: [
+                    { id: 'w1_j1', owner: 'joint', day: 'Mon Oct 26 (9:30 AM)', title: 'Kickoff Sync: Lock Database Schema & Figma Token Contract', desc: 'Agree on exact fields for users, incidents, corroborations, broadcasts, and lock hex codes (#2D6A4F, #F59E0B, #F4F1EA).', ytId: 'tut_figma' },
+                    { id: 'w1_a1', owner: 'me', day: 'Sun Oct 25 (Blitz Day 1)', title: 'Build Figma Master Component Library & Onboarding UIs (Screens 1–5)', desc: 'Set up DM Sans + Noto Sans Sinhala/Tamil styles, button variants, and design Splash, Language Selection, 3-Slide Carousel, Google Login + T&C Modal, and Location Permission.', ytId: 'tut_figma' },
+                    { id: 'w1_a2', owner: 'me', day: 'Mon Oct 26 (Blitz Day 2)', title: 'Design Home Dashboard, Empty State, Quick SOS Sheet & Road Check UIs', desc: 'Design top Plus Code bar, Active Alerts stacked carousel, Calm Jungle empty state, Road Check banner, and 3-slider Quick SOS Bottom Sheet.', ytId: 'tut_figma' },
+                    { id: 'w1_a3', owner: 'me', day: 'Tue Oct 27 (Blitz Day 3)', title: 'Design Elephants Tab, Anti-Poaching Tab & Offline Outbox UIs', desc: 'Design Elephants Feed, Category-First Report Form, Offline Outbox screen, Anti-Poaching Feed, and Mandatory-Photo Poaching Form with Anonymous/Nickname selector.', ytId: 'tut_figma' },
+                    { id: 'w1_a4', owner: 'me', day: 'Wed Oct 28 (Blitz Day 4)', title: 'Design Post Details, Full-Screen Driver SOS, Community & Account UIs', desc: 'Design Unified Post Details, Deep Slate (#0F172A) Driver Warning Overlay, Community Feed/Form, Account Page ("Buy Us a Coffee"), and My Submissions History.', ytId: 'tut_figma' },
+                    { id: 'w1_a5', owner: 'me', day: 'Thu Oct 29 (Blitz Day 5)', title: 'Design All 6 TuskShield Admin Moderation Portal UIs', desc: 'Design Admin Login, Verification Center Dashboard, Incident Queue, Verification Detail Bar (Approve/Resolve/Reject), Broadcast Form, and User Trust Manager.', ytId: 'tut_figma' },
+                    { id: 'w1_b1', owner: 'friend', day: 'Mon–Tue (9:30–2:00)', title: 'Create Supabase Project, Enable PostGIS & Google OAuth', desc: 'Set up $0 Supabase project, enable PostGIS extension in SQL editor, and configure Google Cloud OAuth credentials for Flutter.', ytId: 'tut_supabase' },
+                    { id: 'w1_b2', owner: 'friend', day: 'Wed–Thu (9:30–2:00)', title: 'Write SQL Migrations for Core Tables & Row-Level Security (RLS)', desc: 'Create profiles, incidents, corroborations, community_posts, and broadcasts tables. Add RLS masking user_id when identity_mode is anonymous.', ytId: 'tut_supabase' },
+                    { id: 'w1_b3', owner: 'friend', day: 'Fri–Sat (9:30–2:00)', title: 'Configure Cloudinary Unsigned Upload Preset & Test WebP Pipeline', desc: 'Set up free Cloudinary account (25GB quota), create unsigned preset for TuskShield, and test REST upload.', ytId: 'tut_cloudinary' }
+                ]
+            },
+            {
+                week: 2,
+                dates: 'Nov 1 – Nov 7, 2026',
+                title: 'Week 2: Repository Lock, Data Models & Onboarding / Auth Implementation',
+                goal: 'Lock pubspec.yaml and Dart models together on Monday 9:30 AM, then build the complete multi-language Onboarding & Google Sign-In flow in Flutter.',
+                scheduleNote: 'Overlap: Mon, Tue, Wed (9:30 AM – 2:00 PM) | Dev B Solo: Thu, Fri, Sat | Dev A Solo: Sun',
+                tasks: [
+                    { id: 'w2_j1', owner: 'joint', day: 'Mon Nov 2 (9:30 AM)', title: 'Freeze pubspec.yaml, Folder Boundaries & Dart Data Models', desc: 'Initialize Git repo, lock lib/models/ and AGENT_RULES.md so Antigravity agents never cause merge conflicts.', ytId: 'tut_supabase' },
+                    { id: 'w2_a1', owner: 'me', day: 'Sun–Mon', title: 'Implement Global AppTheme & Multi-Language Font Switcher', desc: 'Configure Jungle Green/Safety Amber ThemeData and dynamic font switching between DM Sans, Noto Sans Sinhala, and Noto Sans Tamil.', ytId: 'tut_l10n' },
+                    { id: 'w2_a2', owner: 'me', day: 'Tue–Wed', title: 'Build Onboarding Screens (Splash, Language, Carousel, Login, Location)', desc: 'Use Google Antigravity + Figma specs to code all 5 onboarding screens including the scrollable Terms & Conditions modal bottom sheet.', ytId: 'tut_figma' },
+                    { id: 'w2_b1', owner: 'friend', day: 'Mon–Wed (9:30–2:00)', title: 'Build Supabase Auth Service & Google Sign-In Repository', desc: 'Implement native Google Sign-In wired to Supabase Auth and auto-create user profile row with default trust_score = 50.', ytId: 'tut_supabase' },
+                    { id: 'w2_b2', owner: 'friend', day: 'Thu–Sat (Solo Backend)', title: 'Create Mock Repositories & Geolocation Permission Handler', desc: 'Build MockIncidentRepository so Dev A can test UI on Sunday, plus geolocator permission wrapper with graceful "Skip" fallback.', ytId: 'tut_osm' }
+                ]
+            },
+            {
+                week: 3,
+                dates: 'Nov 8 – Nov 14, 2026',
+                title: 'Week 3: Home Dashboard, Quick SOS Swipe Sheet & PostGIS Road-Snapping',
+                goal: 'Build the main 5-tab Home shell and Quick SOS swipe sliders while engineering the 50m PostGIS road-coordinate validation backend.',
+                scheduleNote: 'Overlap: Mon, Tue, Wed (9:30 AM – 2:00 PM) | Dev B Solo: Thu, Fri, Sat | Dev A Solo: Sun',
+                tasks: [
+                    { id: 'w3_j1', owner: 'joint', day: 'Wed Nov 11 (1:30 PM)', title: 'Wednesday Pre-Handoff Sync: Test Quick SOS Camera + GPS Trigger', desc: 'Verify Quick SOS swipe gesture triggers camera & background GPS payload before Dev A goes offline Thu/Fri.', ytId: 'tut_postgis' },
+                    { id: 'w3_a1', owner: 'me', day: 'Sun–Mon', title: 'Build 5-Tab Bottom Nav Scaffold & Home Dashboard Top Bar', desc: 'Implement Home, Elephants, Anti-Poaching, Community, and Account/Alerts navigation shell with top Plus Code location bar.', ytId: 'tut_figma' },
+                    { id: 'w3_a2', owner: 'me', day: 'Tue', title: 'Build Swipeable Active Alerts Stack & Calm Jungle Empty State', desc: 'Create stacked card carousel for nearby alerts and the reassuring calm jungle illustration when 0 alerts are active.', ytId: 'tut_figma' },
+                    { id: 'w3_a3', owner: 'me', day: 'Wed', title: 'Build Quick SOS Modal Bottom Sheet with 3 Swipe-to-Confirm Bars', desc: 'Implement pocket-dial-proof swipe sliders for Road-Crossing, Medical Elephant, and Anti-Poaching that launch camera hardware.', ytId: 'tut_figma' },
+                    { id: 'w3_b1', owner: 'friend', day: 'Mon–Wed (9:30–2:00)', title: 'Import Sri Lanka Highway Geometry into Supabase PostGIS', desc: 'Extract primary/secondary/trunk roads in Sri Lanka HEC zones via Overpass API and import into PostGIS roads table.', ytId: 'tut_postgis' },
+                    { id: 'w3_b2', owner: 'friend', day: 'Thu–Sat (Solo Backend)', title: 'Write PostGIS ST_DWithin(50m) Road-Crossing Validation RPC', desc: 'Write PostgreSQL function validate_road_crossing(lat, lng) that returns true only if pin is within 50m of a valid road.', ytId: 'tut_postgis' }
+                ]
+            },
+            {
+                week: 4,
+                dates: 'Nov 15 – Nov 21, 2026',
+                title: 'Week 4: Elephant & Anti-Poaching Reporting + On-Device WebP Compression',
+                goal: 'Complete both specialized incident reporting pipelines and the 6MB-to-120KB WebP photo compression + Cloudinary uploader.',
+                scheduleNote: 'Overlap: Mon, Tue, Wed (9:30 AM – 2:00 PM) | Dev B Solo: Thu, Fri, Sat | Dev A Solo: Sun',
+                tasks: [
+                    { id: 'w4_j1', owner: 'joint', day: 'Mon Nov 16 (9:30 AM)', title: 'Sync & Wire Incident Forms to Supabase & Road Validation RPC', desc: 'Connect Dev A’s reporting forms to Dev B’s PostGIS validation and Cloudinary upload service.', ytId: 'tut_cloudinary' },
+                    { id: 'w4_a1', owner: 'me', day: 'Sun–Mon', title: 'Build Elephants Feed & Category-First Incident Reporting Form', desc: 'Category selector (Medical vs Road Crossing) dynamically toggles mandatory photo box and road-snapped vs free map pin picker.', ytId: 'tut_osm' },
+                    { id: 'w4_a2', owner: 'me', day: 'Tue–Wed', title: 'Build Anti-Poaching Feed & Mandatory-Photo Anonymous Report Form', desc: 'Top mandatory photo dropzone, segmented identity picker (Anonymous, auto-saved Nickname, Real Name), and Corroborate-only cards.', ytId: 'tut_figma' },
+                    { id: 'w4_b1', owner: 'friend', day: 'Mon–Wed (9:30–2:00)', title: 'Build flutter_image_compress (120KB WebP) + Cloudinary Service', desc: 'Compress camera photos on-device to 1080p 75% WebP before uploading to Cloudinary and storing secure URL in Supabase.', ytId: 'tut_cloudinary' },
+                    { id: 'w4_b2', owner: 'friend', day: 'Thu–Sat (Solo Backend)', title: 'Implement Corroboration ("I See This Too") & Nickname Persistence', desc: 'Build atomic RPC increment_corroboration(incident_id) preventing duplicate votes and local SharedPreferences nickname storage.', ytId: 'tut_supabase' }
+                ]
+            },
+            {
+                week: 5,
+                dates: 'Nov 22 – Nov 28, 2026',
+                title: 'Week 5: Rural Offline Outbox Engine (2-Hour Expiry) & Post Details',
+                goal: 'Ensure 100% reliability in rural Sri Lankan dead zones with an auto-expiring offline queue, plus Unified Post Details & Account History.',
+                scheduleNote: 'Overlap: Mon, Tue, Wed (9:30 AM – 2:00 PM) | Dev B Solo: Thu, Fri, Sat | Dev A Solo: Sun',
+                tasks: [
+                    { id: 'w5_j1', owner: 'joint', day: 'Wed Nov 25 (1:30 PM)', title: 'Test Offline Outbox Queue & 2-Hour Road-Crossing Expiry Window', desc: 'Simulate offline submission and verify road crossings older than 2 hours auto-expire while newer ones auto-submit.', ytId: 'tut_offline' },
+                    { id: 'w5_a1', owner: 'me', day: 'Sun–Mon', title: 'Build Unified Post Details Screen with Contextual Proximity Banners', desc: 'Swipeable image header (1/12), author attribution, "Verify Presence" button, and Amber/Green proximity banner ("You are near here").', ytId: 'tut_figma' },
+                    { id: 'w5_a2', owner: 'me', day: 'Tue–Wed', title: 'Build Offline Outbox UI, Account Settings & "My Submissions" History', desc: 'Grouped Account cards, Soft Gold (#D97706) "Buy Us a Coffee" charity button, and centralized My Submissions status tracker.', ytId: 'tut_offline' },
+                    { id: 'w5_b1', owner: 'friend', day: 'Mon–Wed (9:30–2:00)', title: 'Engineer Hive Local Outbox Queue & Connectivity Listener', desc: 'Store compressed WebP image path + JSON payload in Hive when offline; trigger sync when connectivity_plus detects internet.', ytId: 'tut_offline' },
+                    { id: 'w5_b2', owner: 'friend', day: 'Thu–Sat (Solo Backend)', title: 'Configure Workmanager Background Sync & 2-Hour TTL Expiration Logic', desc: 'Check created_at timestamp on reconnect: discard road crossings >2 hours old and notify user; upload valid medical/poaching reports.', ytId: 'tut_offline' }
+                ]
+            },
+            {
+                week: 6,
+                dates: 'Nov 29 – Dec 5, 2026',
+                title: 'Week 6: Community Feed, "Road Check" Route Planner & Admin App Core',
+                goal: 'Build the habit-forming Community Feed and A-to-B Safe Route Planner while Dev B builds the TuskShield Admin Moderation Portal.',
+                scheduleNote: 'Overlap: Mon, Tue, Wed (9:30 AM – 2:00 PM) | Dev B Solo: Thu, Fri, Sat | Dev A Solo: Sun',
+                tasks: [
+                    { id: 'w6_j1', owner: 'joint', day: 'Mon Nov 30 (9:30 AM)', title: 'Sync OSRM Route Polyline Overlay with Active Elephant Pins', desc: 'Connect Dev A’s Road Check map screen with Dev B’s OSRM route geometry and active incident query.', ytId: 'tut_osm' },
+                    { id: 'w6_a1', owner: 'me', day: 'Sun–Mon', title: 'Build "Road Check — Plan a Safe Route" Interactive Map Screen', desc: 'Start & End location inputs using flutter_map + OSRM polyline drawing overlaid with active elephant crossing & medical pins.', ytId: 'tut_osm' },
+                    { id: 'w6_a2', owner: 'me', day: 'Tue–Wed', title: 'Build Community Feed & "Add Community Post" Screen', desc: 'Conservation stories feed with heart counter (♥ 12), multi-select category chips, photo uploader, and Publish button.', ytId: 'tut_figma' },
+                    { id: 'w6_b1', owner: 'friend', day: 'Mon–Wed (9:30–2:00)', title: 'Scaffold TuskShield Admin App: Secure Login & Verification Center', desc: 'Build Admin Login (#0F172A), 4 Quick-Stat cards (Pending, Medical, Poaching, Resolved), and half-screen live overview map.', ytId: 'tut_supabase' },
+                    { id: 'w6_b2', owner: 'friend', day: 'Thu–Sat (Solo Backend)', title: 'Build Admin Incident Queue Master List with 1-Tap Verify/Resolve', desc: 'Filter chips (Needs Verification, Verified, Resolved, Spam) and color-coded rows wired to Supabase admin RLS policies.', ytId: 'tut_supabase' }
+                ]
+            },
+            {
+                week: 7,
+                dates: 'Dec 6 – Dec 12, 2026',
+                title: 'Week 7: Admin Verification Detail, Broadcasts & Full-Screen Driver SOS',
+                goal: 'Complete the Admin verification loop (no dispatch) and trigger the Full-Screen Background Driver Warning when crossings are verified.',
+                scheduleNote: 'Overlap: Mon, Tue, Wed (9:30 AM – 2:00 PM) | Dev B Solo: Thu, Fri, Sat | Dev A Solo: Sun',
+                tasks: [
+                    { id: 'w7_j1', owner: 'joint', day: 'Wed Dec 9 (1:30 PM)', title: 'End-to-End Test: Admin Clicks "Approve" -> Driver Phone Shows SOS', desc: 'Verify that approving a road crossing in Admin App triggers the full-screen driver alert on nearby test phones.', ytId: 'tut_fcm' },
+                    { id: 'w7_a1', owner: 'me', day: 'Sun–Tue', title: 'Build Full-Screen Background Driver Warning UI ("500m Ahead")', desc: 'Deep Slate (#0F172A) high-contrast dashboard screen, pulsing Safety Amber elephant pin, dynamic distance, and "Swipe to Dismiss".', ytId: 'tut_fcm' },
+                    { id: 'w7_a2', owner: 'me', day: 'Wed', title: 'Polish Admin UI Screens (Verification Bar, Broadcast & Trust List)', desc: 'Apply DM Sans / Jungle Green styling to Dev B’s Admin Detail view, Broadcast form, and User Trust progress bars.', ytId: 'tut_figma' },
+                    { id: 'w7_b1', owner: 'friend', day: 'Mon–Wed (9:30–2:00)', title: 'Build Admin Verification Detail Screen, Broadcasts & User Trust Manager', desc: 'Implement sticky moderation bar ("Approve & Verify", "Mark Resolved", "Reject/Spam"), Official Broadcast publisher, and Trust Score actions.', ytId: 'tut_supabase' },
+                    { id: 'w7_b2', owner: 'friend', day: 'Thu–Sat (Solo Backend)', title: 'Configure FCM + flutter_local_notifications Full-Screen Intent', desc: 'Trigger high-priority FCM push via Supabase webhook when incident status becomes Verified or corroborations >= 2.', ytId: 'tut_fcm' }
+                ]
+            },
+            {
+                week: 8,
+                dates: 'Dec 13 – Dec 19, 2026',
+                title: 'Week 8: Rural Field Simulation, Sinhala/Tamil QA & Production Launch',
+                goal: 'Stress-test offline/online transitions, audit Sinhala and Tamil typography across screen sizes, seed initial community stories, and publish.',
+                scheduleNote: 'Final Launch Sprint: Joint Mon–Wed Syncs + Weekend Release Packaging',
+                tasks: [
+                    { id: 'w8_j1', owner: 'joint', day: 'Mon Dec 14 (9:30 AM)', title: 'Full Field Simulation: Airplane Mode, GPS Road-Snap & Battery Audit', desc: 'Test weak 3G transitions, verify geofencing battery usage is minimal, and test non-road pin rejection messages.', ytId: 'tut_offline' },
+                    { id: 'w8_a1', owner: 'me', day: 'Sun–Tue', title: 'Sinhala & Tamil Typography Overflow Audit & Seed 15 Community Posts', desc: 'Check Noto Sans Sinhala/Tamil line heights on small screens and publish 15 initial elephant safety guides to the Community tab.', ytId: 'tut_l10n' },
+                    { id: 'w8_b1', owner: 'friend', day: 'Wed–Fri (9:30–2:00)', title: 'Production Supabase RLS Security Audit & Database Indexes', desc: 'Verify anonymous reporters cannot be de-anonymized via API and add PostGIS GIST indexes for fast spatial queries.', ytId: 'tut_postgis' },
+                    { id: 'w8_j2', owner: 'joint', day: 'Sat–Sun (Dec 19)', title: 'Build Release Signed APK / Play Store AAB & Final Project Handover', desc: 'Generate signed release builds for TuskShield User App & TuskShield Admin App and prepare showcase presentation.', ytId: 'tut_supabase' }
+                ]
+            }
+        ];
+
+        /* ═══════════════════════════════════════════════════════════════════
+           MASTER DATA: 24 FIGMA UI SCREENS (18 USER + 6 ADMIN)
+        ═══════════════════════════════════════════════════════════════════ */
+        const FIGMA_UIS = [
+            // 18 User App UIs
+            { id: 'ui_u1', app: 'user', num: '01', name: 'Splash Screen', day: 'Oct 25', desc: 'Warm off-white canvas, Jungle Green emblem, TuskShield | ඇත්පවුර' },
+            { id: 'ui_u2', app: 'user', num: '02', name: 'Language Selection', day: 'Oct 25', desc: 'First interactive screen: සිංහල, English, தமிழ் pill buttons' },
+            { id: 'ui_u3', app: 'user', num: '03', name: 'Educational Onboarding (3x)', day: 'Oct 25', desc: '3-slide mission carousel with Skip & Next buttons' },
+            { id: 'ui_u4', app: 'user', num: '04', name: 'Login & T&C Bottom Sheet', day: 'Oct 25', desc: 'Continue with Google + Mandatory Terms modal sheet' },
+            { id: 'ui_u5', app: 'user', num: '05', name: 'Location Permission', day: 'Oct 25', desc: 'Confirm Location & Finish primary CTA + Skip fallback' },
+            { id: 'ui_u6', app: 'user', num: '06', name: 'Home Dashboard', day: 'Oct 26', desc: 'Plus Code top bar, Active Alerts stack, Road Check banner, Feed' },
+            { id: 'ui_u7', app: 'user', num: '07', name: 'Home Empty Alerts Variant', day: 'Oct 26', desc: 'Calm jungle illustration: "No active alerts nearby. Area is safe."' },
+            { id: 'ui_u8', app: 'user', num: '08', name: 'Quick SOS Bottom Sheet', day: 'Oct 26', desc: '3 large swipe-to-confirm sliders (Road, Medical, Poaching)' },
+            { id: 'ui_u9', app: 'user', num: '09', name: 'Road Check Safe Route Map', day: 'Oct 26', desc: 'A-to-B route planner showing active crossing & medical pins' },
+            { id: 'ui_u10', app: 'user', num: '10', name: 'Elephants Tab Feed', day: 'Oct 27', desc: 'Medical & Road Crossing cards with "I See This Too" counter' },
+            { id: 'ui_u11', app: 'user', num: '11', name: 'Elephant Reporting Form', day: 'Oct 27', desc: 'Category-first selector, photo box, road-snapped map pin' },
+            { id: 'ui_u12', app: 'user', num: '12', name: 'Offline Outbox Sync State', day: 'Oct 27', desc: 'Signal indicator + "Saved to Outbox (2-hour auto-expiry)"' },
+            { id: 'ui_u13', app: 'user', num: '13', name: 'Anti-Poaching Tab Feed', day: 'Oct 27', desc: 'High-priority anonymous cards, Corroborate only (no Reject)' },
+            { id: 'ui_u14', app: 'user', num: '14', name: 'Anti-Poaching Report Form', day: 'Oct 27', desc: 'Mandatory top photo + Identity selector (Anonymous/Nickname)' },
+            { id: 'ui_u15', app: 'user', num: '15', name: 'Unified Post Details Page', day: 'Oct 28', desc: 'Swipe gallery (1/12), Verify Presence CTA, proximity banner' },
+            { id: 'ui_u16', app: 'user', num: '16', name: 'Full-Screen Driver Warning', day: 'Oct 28', desc: 'Deep Slate (#0F172A) + Pulsing Amber pin + Swipe to Dismiss' },
+            { id: 'ui_u17', app: 'user', num: '17', name: 'Community Feed & Add Post', day: 'Oct 28', desc: 'Conservation stories with ♥ counter + Pen FAB Add Post form' },
+            { id: 'ui_u18', app: 'user', num: '18', name: 'Account & My Submissions', day: 'Oct 28', desc: 'Grouped settings, "Buy Us a Coffee ☕", and Submission History' },
+
+            // 6 Admin App UIs
+            { id: 'ui_a1', app: 'admin', num: 'A1', name: 'Secure Admin Login', day: 'Oct 29', desc: 'Dark Navy (#0F172A) restricted login with Official ID & Password' },
+            { id: 'ui_a2', app: 'admin', num: 'A2', name: 'Verification Center (Home)', day: 'Oct 29', desc: '4 quick-stat cards + half-screen live map + unverified queue' },
+            { id: 'ui_a3', app: 'admin', num: 'A3', name: 'Incident Queue Master List', day: 'Oct 29', desc: 'Filter chips + high-density rows with 1-tap Verify & Resolve' },
+            { id: 'ui_a4', app: 'admin', num: 'A4', name: 'Incident Verification Detail', day: 'Oct 29', desc: 'Trust score card, photo evidence & sticky Approve/Resolve/Reject bar' },
+            { id: 'ui_a5', app: 'admin', num: 'A5', name: 'Broadcast & Official Updates', day: 'Oct 29', desc: 'Push to Community Feed, Top Banner, or Full-Screen Driver Alert' },
+            { id: 'ui_a6', app: 'admin', num: 'A6', name: 'User Trust Management', day: 'Oct 29', desc: 'Reporter trust score bars (0–100%) + Trusted/Mute/Ban menu' }
+        ];
+
+        /* ═══════════════════════════════════════════════════════════════════
+           MASTER DATA: SUPPORTIVE YOUTUBE TUTORIALS
+        ═══════════════════════════════════════════════════════════════════ */
+        const YOUTUBE_TUTORIALS = [
+            {
+                id: 'tut_figma',
+                role: 'Dev A (Me)',
+                tone: 'a',
+                title: 'Figma Auto-Layout, Variables & Material 3 Design System',
+                channel: 'Figma / Mizko',
+                duration: 'Week 1 (Oct 25–29 Blitz)',
+                desc: 'Essential for building your Master Component Library on Oct 25 so all 24 User & Admin screens share reusable buttons, color tokens, and cards.',
+                url: 'https://www.youtube.com/results?search_query=figma+mobile+app+design+system+auto+layout+tutorial'
+            },
+            {
+                id: 'tut_supabase',
+                role: 'Dev B (Friend)',
+                tone: 'b',
+                title: 'Flutter + Supabase Full Course (Google Auth, Database & RLS)',
+                channel: 'Supabase Official / Mitch Koko',
+                duration: 'Weeks 1–2 Core Setup',
+                desc: 'Step-by-step guide to connecting Flutter to Supabase, setting up native Google Sign-In, and writing Row-Level Security policies for anonymous posts.',
+                url: 'https://www.youtube.com/results?search_query=flutter+supabase+google+sign+in+rls+tutorial'
+            },
+            {
+                id: 'tut_postgis',
+                role: 'Dev B (Friend)',
+                tone: 'b',
+                title: 'Supabase PostGIS Geospatial Queries & ST_DWithin in Flutter',
+                channel: 'Supabase Official',
+                duration: 'Week 3 Road-Snapping',
+                desc: 'Learn how to enable PostGIS in Supabase and write SQL RPC functions using ST_DWithin to verify if an elephant crossing pin is within 50m of a road.',
+                url: 'https://www.youtube.com/watch?v=9f3B9A3N6Y0'
+            },
+            {
+                id: 'tut_osm',
+                role: 'Both (Dev A & B)',
+                tone: 'j',
+                title: 'flutter_map + OpenStreetMap + OSRM Route Polyline Tutorial',
+                channel: 'Flutter Map Community',
+                duration: 'Weeks 4 & 6 ("Road Check")',
+                desc: '100% free alternative to Google Maps (no credit card). Covers custom elephant pins, interactive map tap coordinates, and drawing A-to-B safe routes.',
+                url: 'https://www.youtube.com/results?search_query=flutter_map+openstreetmap+route+polyline+osrm+tutorial'
+            },
+            {
+                id: 'tut_cloudinary',
+                role: 'Dev B (Friend)',
+                tone: 'b',
+                title: 'Flutter Image Compress (WebP) + Free Cloudinary Upload',
+                channel: 'Flutter Community',
+                duration: 'Week 4 Photo Pipeline',
+                desc: 'Shows how to shrink 6MB camera photos down to ~120KB WebP on the phone CPU and upload directly to Cloudinary without Firebase Blaze billing.',
+                url: 'https://www.youtube.com/results?search_query=flutter_image_compress+cloudinary+upload+flutter'
+            },
+            {
+                id: 'tut_offline',
+                role: 'Both (Dev A & B)',
+                tone: 'j',
+                title: 'Offline-First Flutter App with Hive + Connectivity Plus + Workmanager',
+                channel: 'Reso Coder / Vandad Nahavandipoor',
+                duration: 'Week 5 Rural Outbox',
+                desc: 'Architecting the local Offline Outbox queue so reports taken in rural Sri Lankan dead zones save locally and auto-submit if reconnected within 2 hours.',
+                url: 'https://www.youtube.com/results?search_query=flutter+offline+first+sync+hive+connectivity_plus+tutorial'
+            },
+            {
+                id: 'tut_fcm',
+                role: 'Both (Dev A & B)',
+                tone: 'j',
+                title: 'FCM + flutter_local_notifications Full-Screen Background Intent',
+                channel: 'Firebase / Flutter Guys',
+                duration: 'Week 7 Driver SOS Alert',
+                desc: 'How to wake up the screen and trigger the high-contrast Deep Slate "Elephants Nearby • 500m Ahead" driver alert when an incident is verified.',
+                url: 'https://www.youtube.com/results?search_query=flutter+firebase+messaging+full+screen+intent+notification'
+            },
+            {
+                id: 'tut_l10n',
+                role: 'Dev A (Me)',
+                tone: 'a',
+                title: 'Flutter Multi-Language Localization (English, Sinhala, Tamil) + Google Fonts',
+                channel: 'Flutter Official / HeyFlutter',
+                duration: 'Week 2 & Week 8 QA',
+                desc: 'Implementing instant global language switching on the very first onboarding screen and pairing DM Sans with Noto Sans Sinhala & Tamil.',
+                url: 'https://www.youtube.com/results?search_query=flutter+localization+multi+language+arb+tutorial'
+            }
+        ];
+
+        const MEETING_CHECKLIST_ITEMS = [
+            { id: 'm_1', text: '1. Lock Folder Boundaries: Confirm Dev A stays in lib/features_user/ and Dev B stays in lib/services/ & supabase/.' },
+            { id: 'm_2', text: '2. Review Oct 25–29 Figma Progress: Walk through completed User & Admin screens so Dev B can match database columns.' },
+            { id: 'm_3', text: '3. Freeze Dart Models: Agree on exact JSON keys for IncidentModel (category, lat, lng, photo_url, identity_mode, expires_at).' },
+            { id: 'm_4', text: '4. Wednesday 1:30 PM Pre-Handoff Check: Ensure Dev B has everything needed for Thursday/Friday solo backend sprints.' },
+            { id: 'm_5', text: '5. Saturday/Sunday Async Handoff: Friend pushes backend PRs Saturday afternoon; Me pulls and wires UI Sunday morning.' }
+        ];
+
+/* ── State ── */
+const STORAGE_KEY = 'tuskshield_planner_v1';
+let state = { completedTasks:{}, completedFigma:{}, completedMeeting:{}, meetingNotes:'' };
+let view = 'sprints', role = 'all', weekFilter = 'all';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct = (d, t) => t ? Math.round(d / t * 100) : 0;
+const norm = o => ({ completedTasks:o.completedTasks||{}, completedFigma:o.completedFigma||{}, completedMeeting:o.completedMeeting||{}, meetingNotes:o.meetingNotes||'' });
+
+function load(){ try { const r = localStorage.getItem(STORAGE_KEY); if (r) state = norm(JSON.parse(r)); } catch(e){} }
+function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} updateProgress(); }
+let toastTimer;
+function toast(msg){ $('#toastMsg').textContent = msg; $('#toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 2400); }
+
+/* ── Progress ── */
+function updateProgress(){
+  const all = SPRINT_WEEKS.flatMap(w => w.tasks);
+  const done = a => a.filter(t => state.completedTasks[t.id]).length;
+  const fig = FIGMA_UIS.filter(u => state.completedFigma[u.id]).length;
+  const total = all.length + FIGMA_UIS.length, got = done(all) + fig, g = pct(got, total);
+  $('#gLabel').textContent = g + '%'; $('#gBar').style.width = g + '%';
+  $('#gSub').textContent = `${got} of ${total} items (tasks and Figma screens)`;
+  $('#navPct').textContent = g + '%'; $('#navBar').style.width = g + '%';
+  [['A','me'],['B','friend'],['J','joint']].forEach(([k, o]) => {
+    const a = all.filter(t => t.owner === o), d = done(a);
+    $('#b' + k).style.width = pct(d, a.length) + '%';
+    $('#c' + k).textContent = `${pct(d, a.length)}%  ${d}/${a.length}`;
+  });
+  $('#bF').style.width = pct(fig, FIGMA_UIS.length) + '%';
+  $('#cF').textContent = `${fig}/${FIGMA_UIS.length}`;
+  $('#figmaCounter').textContent = `${fig} / ${FIGMA_UIS.length}`;
+  SPRINT_WEEKS.forEach(w => {
+    const c = $(`.wcell[data-week="${w.week}"]`); if (!c) return;
+    const p = pct(done(w.tasks), w.tasks.length);
+    c.style.setProperty('--p', p + '%'); $('.wp', c).textContent = p + '%';
+  });
+}
+
+/* ── Navigation ── */
+function go(v, r){
+  view = v; if (r) role = r;
+  ['sprints','schedule','figma','tutorials'].forEach(x => $('#view-' + x).hidden = x !== v);
+  $$('.tab').forEach(t => t.setAttribute('aria-current', String(t.dataset.view === v && (v !== 'sprints' || t.dataset.role === role))));
+  if (v === 'sprints') renderSprints(); else if (v === 'figma') renderFigma(); else if (v === 'schedule') renderMeeting();
+}
+function setWeek(w){
+  weekFilter = String(w); $('#weekSel').value = weekFilter;
+  $$('.wcell').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.week === weekFilter)));
+  renderSprints();
+}
+
+/* ── Sprints ── */
+const OWNERS = {
+  me:{ cls:'a', icon:'palette-fill', label:'Me (Dev A)' },
+  friend:{ cls:'b', icon:'hdd-network-fill', label:'Friend (Dev B)' },
+  joint:{ cls:'j', icon:'people-fill', label:'Joint sync' }
+};
+const chip = o => `<span class="chip ${OWNERS[o].cls}"><i class="bi bi-${OWNERS[o].icon}"></i>${OWNERS[o].label}</span>`;
+const ROLE_NOTES = {
+  me:{ cls:'a', tag:'Folder-isolated, zero conflicts', t:'Showing your tasks (Dev A: UI/UX and Flutter frontend)', p:'Availability: Oct 25–29 full UI blitz, then Mon, Tue, Wed and Sunday (busy Thu/Fri, off Sat). Workspace: <code>lib/features_user/</code>' },
+  friend:{ cls:'b', tag:'Solo Thu/Fri/Sat is safe', t:"Showing your friend's tasks (Dev B: Supabase, PostGIS, offline and admin)", p:'Availability: Mon–Fri (9:30 AM – 2:00 PM) plus Saturday, off Sunday. Workspace: <code>lib/services/</code>, <code>supabase/</code> and <code>lib/features_admin/</code>' },
+  joint:{ cls:'j', tag:'', t:'Showing joint sync and integration milestones', p:'Best scheduled in your golden overlap windows: Monday, Tuesday and Wednesday (9:30 AM – 2:00 PM).' }
+};
+
+function renderSprints(){
+  const n = ROLE_NOTES[role], rn = $('#roleNote');
+  rn.hidden = !n;
+  if (n) rn.innerHTML = `<div><h3>${n.t}</h3><p>${n.p}</p></div>${n.tag ? `<span class="chip ${n.cls}">${n.tag}</span>` : ''}`;
+
+  const status = $('#statusSel').value, q = $('#q').value.trim().toLowerCase();
+  const inRole = t => role === 'all' || t.owner === role;
+  let shown = 0, universe = 0;
+  const html = SPRINT_WEEKS.filter(w => weekFilter === 'all' || String(w.week) === weekFilter).map(w => {
+    const roleTasks = w.tasks.filter(inRole); universe += roleTasks.length;
+    const tasks = roleTasks.filter(t => {
+      const d = !!state.completedTasks[t.id];
+      return (status === 'all' || (status === 'completed') === d) && (!q || (t.title + t.desc + t.day).toLowerCase().includes(q));
+    });
+    if (!tasks.length) return ''; shown += tasks.length;
+    const dn = roleTasks.filter(t => state.completedTasks[t.id]).length, p = pct(dn, roleTasks.length);
+    const rows = tasks.map(t => {
+      const d = !!state.completedTasks[t.id], y = YOUTUBE_TUTORIALS.find(x => x.id === t.ytId);
+      return `<li class="${d ? 'done' : ''}"><label class="row">
+        <input type="checkbox" class="cb" data-id="${t.id}" ${d ? 'checked' : ''}><span class="box"><i class="bi bi-check-lg"></i></span>
+        <span class="when mono">${esc(t.day)}</span>
+        <span class="task"><b>${esc(t.title)}</b><span class="desc">${esc(t.desc)}</span>${y ? `<a class="yt" href="${y.url}" target="_blank" rel="noopener noreferrer" title="Watch on YouTube"><i class="bi bi-youtube"></i><span>${esc(y.title)}</span></a>` : ''}</span>
+        ${chip(t.owner)}</label></li>`;
+    }).join('');
+    return `<article class="panel"><header class="panel-h wk-h"><div>
+        <div class="wk-meta"><span class="dates mono">${esc(w.dates)}</span><span class="note">${esc(w.scheduleNote)}</span></div>
+        <h2>${esc(w.title)}</h2><p class="goal">${esc(w.goal)}</p></div>
+        <div class="wk-prog"><span class="mono">${dn}/${roleTasks.length} done, ${p}%</span><div class="track"><i style="width:${p}%"></i></div></div>
+      </header><ul class="rows">${rows}</ul></article>`;
+  }).join('');
+  $('#resultCount').textContent = `${shown} of ${universe} tasks`;
+  $('#sprintsContainer').innerHTML = html || `<div class="empty"><h3>No tasks match these filters</h3><p>Clear the search or set status to All tasks to see everything for this selection.</p><button class="btn" id="btnClear">Clear filters</button></div>`;
+}
+$('#sprintsContainer').addEventListener('change', e => {
+  const id = e.target.dataset && e.target.dataset.id; if (!id) return;
+  state.completedTasks[id] = e.target.checked; save(); renderSprints();
+  const el = $(`.cb[data-id="${id}"]`); if (el) el.focus();
+  toast(e.target.checked ? 'Task marked complete' : 'Task marked incomplete');
+});
+$('#sprintsContainer').addEventListener('click', e => {
+  if (e.target.id === 'btnClear'){ $('#q').value = ''; $('#statusSel').value = 'all'; setWeek('all'); }
+});
+
+/* ── Figma ── */
+function renderFigma(){
+  const u = [], a = [];
+  FIGMA_UIS.forEach(s => {
+    const d = !!state.completedFigma[s.id];
+    (s.app === 'user' ? u : a).push(`<div class="${d ? 'done' : ''}"><label class="frow">
+      <input type="checkbox" class="cb" data-fid="${s.id}" ${d ? 'checked' : ''}><span class="box"><i class="bi bi-check-lg"></i></span>
+      <span><b><span class="n mono">${s.num}</span>${esc(s.name)}</b><span class="desc">${esc(s.desc)}</span></span>
+      <span class="chip a mono">${esc(s.day)}</span></label></div>`);
+  });
+  $('#userFigma').innerHTML = u.join(''); $('#adminFigma').innerHTML = a.join('');
+}
+$('#view-figma').addEventListener('change', e => {
+  const id = e.target.dataset && e.target.dataset.fid; if (!id) return;
+  state.completedFigma[id] = e.target.checked; save(); renderFigma();
+  const el = $(`.cb[data-fid="${id}"]`); if (el) el.focus();
+  toast(e.target.checked ? 'Figma screen completed' : 'Figma screen marked incomplete');
+});
+
+/* ── Schedule ── */
+const MATRIX = [
+  ['Monday','a','Available','b','9:30 AM – 2:00 PM','Golden overlap 1 (9:30 AM kickoff):','Merge weekend PRs, lock weekly models, pair-debug.',1],
+  ['Tuesday','a','Available','b','9:30 AM – 2:00 PM','Golden overlap 2 (9:30 AM – 2:00 PM):','Parallel Antigravity sprint + live API wiring.',1],
+  ['Wednesday','a','Available','b','9:30 AM – 2:00 PM','Golden overlap 3 (1:30 PM pre-handoff):','Sync before Dev A goes offline Thu/Fri.',1],
+  ['Thursday','x','Busy','b','9:30 AM – 2:00 PM','Friend solo backend sprint:','Works strictly in <code>lib/services/</code> and <code>supabase/</code>. Zero conflict risk.',0],
+  ['Friday','x','Busy','b','9:30 AM – 2:00 PM','Friend solo backend sprint:','Continues PostGIS, Hive Outbox and Admin logic.',0],
+  ['Saturday','o','Off','b','Available (weekend sprint)','Friend weekend PR push:','Friend pushes completed backend services to the <code>develop</code> branch with notes.',0],
+  ['Sunday','a','Available all day','o','Off','My weekend UI sprint:',"Pull Friend's Saturday PR, wire UI screens in <code>lib/features_user/</code>, prep Monday sync.",0]
+];
+function renderMatrix(){
+  $('#matrixBody').innerHTML = MATRIX.map(r => `<tr class="${r[7] ? 'hot' : ''}"><td>${r[0]}</td><td><span class="chip ${r[1]}">${r[2]}</span></td><td><span class="chip ${r[3]}">${r[4]}</span></td><td><b>${r[5]}</b> ${r[6]}</td></tr>`).join('');
+}
+function renderMeeting(){
+  $('#meetingList').innerHTML = MEETING_CHECKLIST_ITEMS.map(i => {
+    const d = !!state.completedMeeting[i.id];
+    return `<div class="${d ? 'done' : ''}"><label class="frow"><input type="checkbox" class="cb" data-mid="${i.id}" ${d ? 'checked' : ''}><span class="box"><i class="bi bi-check-lg"></i></span><span class="t" style="font-weight:500;font-size:13px">${esc(i.text)}</span></label></div>`;
+  }).join('');
+  $('#notes').value = state.meetingNotes || '';
+}
+$('#meetingList').addEventListener('change', e => {
+  const id = e.target.dataset && e.target.dataset.mid; if (!id) return;
+  state.completedMeeting[id] = e.target.checked; save(); renderMeeting();
+  const el = $(`.cb[data-mid="${id}"]`); if (el) el.focus();
+});
+$('#notes').addEventListener('input', () => { state.meetingNotes = $('#notes').value; save(); $('#savedBadge').textContent = 'Saved'; });
+
+/* ── Tutorials ── */
+function renderTutorials(){
+  $('#tutGrid').innerHTML = YOUTUBE_TUTORIALS.map(t => `<div class="tut">
+    <div class="tut-h"><span class="chip ${t.tone}">${esc(t.role)}</span><span class="mono">${esc(t.duration)}</span></div>
+    <h3>${esc(t.title)}</h3><p>${esc(t.desc)}</p>
+    <div class="tut-f"><span><i class="bi bi-collection-play"></i> ${esc(t.channel)}</span><a href="${t.url}" target="_blank" rel="noopener noreferrer"><i class="bi bi-youtube"></i> Watch tutorial</a></div></div>`).join('');
+}
+
+/* ── Backup, copy, reset ── */
+$('#btnExport').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type:'application/json' }));
+  a.download = `TuskShield_Progress_${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast('Exported progress JSON');
+};
+$('#btnImport').onclick = () => $('#importInput').click();
+$('#importInput').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try { state = norm(JSON.parse(ev.target.result)); save(); go(view); toast('Progress imported'); }
+    catch(err){ toast('That file is not a valid progress backup'); }
+  };
+  r.readAsText(f); e.target.value = '';
+};
+$('#btnCopy').onclick = async () => {
+  const t = $('#rules').textContent;
+  try { await navigator.clipboard.writeText(t); }
+  catch(e){ const ta = document.createElement('textarea'); ta.value = t; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  toast('Copied AGENT_RULES.md');
+};
+$('#btnReset').onclick = () => $('#resetDlg').showModal();
+$('#dlgCancel').onclick = () => $('#resetDlg').close();
+$('#dlgOk').onclick = () => {
+  state.completedTasks = {}; state.completedFigma = {}; state.completedMeeting = {};
+  save(); go(view); $('#resetDlg').close(); toast('All checkmarks reset');
+};
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+  $('#weekSel').innerHTML = '<option value="all">All 8 weeks</option>' + SPRINT_WEEKS.map(w => `<option value="${w.week}">Week ${w.week} (${esc(w.dates.split(' – ')[0])})</option>`).join('');
+  $('#weekStrip').innerHTML = SPRINT_WEEKS.map(w => `<button class="wcell" data-week="${w.week}" aria-pressed="false" title="${esc(w.title)}"><span class="wl mono">W${w.week}</span><span class="wd">${esc(w.dates.split(' – ')[0])}</span><span class="wp mono">0%</span></button>`).join('');
+  $$('.wcell').forEach(c => c.onclick = () => { setWeek(weekFilter === c.dataset.week ? 'all' : c.dataset.week); go('sprints'); $('#sprintsContainer').scrollIntoView({ block:'start' }); });
+  $$('.tab').forEach(t => t.onclick = () => go(t.dataset.view, t.dataset.role));
+  $$('[data-goto]').forEach(b => b.onclick = () => { go(b.dataset.goto); window.scrollTo({ top:0 }); });
+  $('#weekSel').onchange = e => setWeek(e.target.value);
+  $('#statusSel').onchange = renderSprints; $('#q').oninput = renderSprints;
+  renderMatrix(); renderTutorials();
+  go('sprints', 'all');
+  requestAnimationFrame(() => requestAnimationFrame(updateProgress));
+});
+</script>
+</body>
+</html>
