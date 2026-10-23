@@ -204,6 +204,9 @@ textarea{width:100%;min-height:190px;resize:vertical;background:var(--paper);bor
 .recs b{font-size:14px}
 .recs p{font-size:13px;color:var(--muted);margin-top:3px}
 
+
+.tree{margin:12px 0 0;padding:14px 16px;background:var(--sunk);border:1px solid var(--line);border-radius:6px;font-size:12px;line-height:1.65;overflow:auto;max-height:560px;white-space:pre;tab-size:4}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:12px;color:var(--muted)}
 footer{padding:8px 0 40px;font-size:12px;color:var(--muted)}
 
 /* ── Dialog + toast ── */
@@ -390,6 +393,180 @@ dialog h2{font-size:17px}dialog p{font-size:13px;color:var(--muted);margin-top:8
         <div class="panel-h"><h2>5 recommendations to keep TuskShield on track</h2></div>
         <ul class="recs"><li><b>1. The "Wednesday 1:30 PM Handoff" Ritual</b><p>Because you are unavailable Thursday & Friday while your friend works 9:30 AM–2:00 PM, spend 15 minutes every Wednesday at 1:30 PM agreeing on the exact mock interfaces so neither of you is blocked for the next 4 days.</p></li><li><b>2. Mock-First Repository Pattern in Week 2</b><p>Have your friend create <code>MockIncidentService</code> returning dummy elephant sightings on Day 1 of Week 2. You can build and test all 18 Flutter UI screens immediately without waiting for PostGIS queries to finish.</p></li><li><b>3. Pre-Download Sri Lanka Highway Geometry Only</b><p>Instead of importing every footpath in Sri Lanka into Supabase (which hits the 500MB free PostGIS cap), filter OpenStreetMap via Overpass to import only <code>highway=primary|secondary|tertiary|trunk</code> in HEC zones (Habarana, Anuradhapura, Polonnaruwa, Monaragala, Hambantota) — takes under 18 MB!</p></li><li><b>4. Use One Shared Supabase Project for Both Apps</b><p>Both the User App and TuskShield Admin App connect to the exact same Supabase URL & Anon Key, differentiated only by an <code>is_admin</code> role flag in PostgreSQL Row-Level Security (RLS).</p></li><li><b>5. Seed 15 Conservation Stories Before Launch</b><p>To avoid an empty app on launch day, pre-populate the Community tab in Week 8 with 15 real Sri Lankan elephant identification guides, first-aid tips, and safe-driving infographics.</p></li></ul>
       </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><div><h2><i class="bi bi-diagram-3"></i> Project file structure</h2><p class="sub">Folder ownership for the two-dev workflow: Dev A works in the UI folders, Dev B in <code>services/</code> and <code>supabase/</code>, and <code>core/</code> and <code>models/</code> lock after Day 2.</p></div><button class="btn pri" id="btnCopyTree"><i class="bi bi-clipboard-check"></i> Copy structure</button></div>
+      <div class="pad"><div class="legend"><span>👨‍💻 Developer-owned folder</span><span>🔒 Locked after Day 2</span><span>🚀 App entrypoint</span></div><pre id="tree" class="tree">tuskshield/
+├── .agents/                                      # Google Antigravity AI Agent Configuration
+│   ├── AGENT_RULES.md                            # Strict folder boundaries &amp; zero-cost rules
+│   └── mcp_config.json                           # Supabase/Postgres &amp; GitHub MCP server links
+│
+├── supabase/                                     # 👨‍💻 DEV B: Backend Database &amp; PostGIS SQL
+│   ├── config.toml                               # Local Supabase CLI configuration
+│   ├── seed.sql                                  # Initial test roads &amp; dummy incident seeds
+│   └── migrations/
+│       ├── 20261025000001_enable_postgis.sql     # Enables PostGIS extension for geospatial queries
+│       ├── 20261025000002_create_schema.sql      # Tables: profiles, incidents, corroborations, posts, broadcasts
+│       ├── 20261025000003_rls_policies.sql       # Row-Level Security (masks Anonymous &amp; Nickname users)
+│       ├── 20261025000004_road_snap_rpc.sql      # PostGIS ST_DWithin(50m) road-crossing validator RPC
+│       └── 20261025000005_trust_score_trig.sql   # Auto-calculates reporter trust % on Admin Verify/Reject
+│
+├── assets/                                       # Static App Assets (Registered in pubspec.yaml)
+│   ├── fonts/                                    # Offline fallback fonts
+│   │   ├── DMSans/                               # English primary geometric font
+│   │   ├── NotoSansSinhala/                      # Sinhala matched-weight font
+│   │   └── NotoSansTamil/                        # Tamil matched-baseline font
+│   ├── images/
+│   │   ├── logo_tuskshield.png                   # TuskShield | ඇත්පවුර emblem
+│   │   ├── onboarding_1_conflict.png             # Slide 1: Mitigating HEC illustration
+│   │   ├── onboarding_2_road_alert.png           # Slide 2: Real-time road alerts illustration
+│   │   ├── onboarding_3_poaching.png             # Slide 3: Anonymous anti-poaching illustration
+│   │   ├── empty_calm_jungle.png                 # Empty state graphic ("Area is currently safe")
+│   │   └── empty_clipboard_jungle.png            # Empty state graphic for "My Submissions"
+│   ├── icons/
+│   │   ├── pin_elephant_crossing.png             # Safety Amber (#F59E0B) map marker
+│   │   ├── pin_medical_emergency.png             # Jungle Green/Blue map marker
+│   │   └── pin_poaching_alert.png                # Crimson Red (#EF4444) map marker
+│   └── l10n/                                     # Multi-Language Translation JSONs
+│       ├── app_en.arb                            # English strings
+│       ├── app_si.arb                            # සිංහල strings
+│       └── app_ta.arb                            # தமிழ் strings
+│
+├── lib/                                          # Main Flutter Source Directory
+│   ├── main_user.dart                            # 🚀 Entrypoint 1: TuskShield Public User App
+│   ├── main_admin.dart                           # 🛡️ Entrypoint 2: TuskShield Admin Verification App
+│   │
+│   ├── core/                                     # 🔒 LOCKED AFTER DAY 2 (Shared Foundation)
+│   │   ├── config/
+│   │   │   ├── env_config.dart                   # Loads Supabase URL, Anon Key &amp; Cloudinary Preset
+│   │   │   └── app_constants.dart                # 2-hr outbox expiry, 50m road tolerance, 500m alert radius
+│   │   ├── theme/
+│   │   │   ├── app_colors.dart                   # Jungle Green (#2D6A4F), Safety Amber (#F59E0B), Earth (#F4F1EA)
+│   │   │   ├── app_typography.dart               # Dynamic DM Sans / Noto Sans Sinhala / Tamil text styles
+│   │   │   ├── user_theme.dart                   # Material 3 Warm Earth theme for User App
+│   │   │   └── admin_theme.dart                  # Material 3 High-Density Cool Gray theme for Admin App
+│   │   ├── routing/
+│   │   │   ├── user_router.dart                  # GoRouter config for the 18 User App screens
+│   │   │   └── admin_router.dart                 # GoRouter config for the 6 Admin App screens
+│   │   ├── localization/
+│   │   │   └── locale_provider.dart              # Instant global language state switcher (EN / SI / TA)
+│   │   └── utils/
+│   │       ├── geo_utils.dart                    # Distance calculators, Plus Code formatter
+│   │       ├── time_expiry_helper.dart           # Checks if queued offline road report is &gt; 2 hours old
+│   │       └── snackbar_helper.dart              # Standardized themed toast alerts
+│   │
+│   ├── models/                                   # 🔒 LOCKED AFTER DAY 2 (Shared Data Contracts)
+│   │   ├── user_profile_model.dart               # ID, email, savedNickname, trustScore, warningsEnabled
+│   │   ├── incident_model.dart                   # ID, category (road/medical/poaching), lat, lng, identityMode, status
+│   │   ├── outbox_item_model.dart                # Hive local model: localImagePaths, createdAt, expiresAt
+│   │   ├── community_post_model.dart             # ID, authorName, title, tags, imageUrls, likesCount
+│   │   └── broadcast_model.dart                  # ID, title, body, targetType (feed/banner/driver_sos)
+│   │
+│   ├── services/                                 # 👨‍💻 DEV B ONLY: Backend, Offline, Media &amp; GPS Engines
+│   │   ├── interfaces/                           # Mock-first contracts so Dev A is never blocked
+│   │   │   ├── i_auth_service.dart
+│   │   │   ├── i_incident_service.dart
+│   │   │   └── i_community_service.dart
+│   │   ├── auth/
+│   │   │   └── supabase_auth_service.dart        # Google Sign-In (User) &amp; Official ID/Pass login (Admin)
+│   │   ├── database/
+│   │   │   ├── incident_service.dart             # CRUD for Elephants &amp; Anti-Poaching + "Corroborate" RPC
+│   │   │   ├── community_service.dart            # Fetches feed, publishes stories, toggles hearts
+│   │   │   └── admin_moderation_service.dart     # 1-tap Approve/Verify, Mark Resolved, Reject/Spam, User Trust
+│   │   ├── media/
+│   │   │   ├── image_compressor_service.dart     # flutter_image_compress: 6MB camera photo -&gt; ~120KB WebP
+│   │   │   └── cloudinary_upload_service.dart    # Unsigned free upload preset -&gt; returns secure HTTPS URLs
+│   │   ├── geospatial/
+│   │   │   ├── location_service.dart             # GPS permissions, current coordinates, geofence listener
+│   │   │   ├── osm_road_validator_service.dart   # Verifies Road Crossing pin is on/near an actual road
+│   │   │   └── osrm_route_check_service.dart     # Calculates A-to-B path &amp; intersects active elephant pins
+│   │   ├── offline_outbox/
+│   │   │   ├── hive_outbox_storage.dart          # Saves reports locally when rural signal drops
+│   │   │   └── outbox_sync_worker.dart           # Workmanager background sync (discards if &gt; 2hrs expired)
+│   │   └── notifications/
+│   │       ├── fcm_background_handler.dart       # Wakes app on high-priority "Active Crossing 500m" push
+│   │       └── local_alert_overlay_service.dart  # Launches Screen 5B (Full-Screen Driver Warning)
+│   │
+│   ├── shared_widgets/                           # 👨‍💻 DEV A: Reusable UI Components
+│   │   ├── primary_jungle_button.dart            # #2D6A4F rounded CTA button
+│   │   ├── swipe_action_slider.dart              # Reusable swipe-to-confirm bar (SOS sheet &amp; Driver dismiss)
+│   │   ├── corroborate_upvote_badge.dart         # "I See This Too (12)" positive verification button
+│   │   ├── category_status_chip.dart             # Medical, Road Crossing, Poaching, Verified, Outbox pills
+│   │   ├── osm_interactive_map.dart              # Reusable flutter_map widget with custom TuskShield pins
+│   │   └── image_carousel_header.dart            # Top swipeable photo gallery with "1/12" counter
+│   │
+│   ├── features_user/                            # 👨‍💻 DEV A ONLY: All 18 Public User App Screens
+│   │   ├── onboarding/
+│   │   │   ├── splash_screen.dart                # 1. Logo loading &amp; SLDevs footer
+│   │   │   ├── language_select_screen.dart       # 2. First interactive screen: Sinhala / English / Tamil
+│   │   │   ├── onboarding_carousel_screen.dart   # 3. 3-slide educational mission guide + Skip
+│   │   │   ├── login_screen.dart                 # 4. Google Sign-In + mandatory T&amp;C checkbox
+│   │   │   ├── widgets/
+│   │   │   │   └── terms_conditions_sheet.dart   # Scrollable legal modal bottom sheet
+│   │   │   └── location_permission_screen.dart   # 5. GPS prompt with "Confirm Location" &amp; "Skip"
+│   │   │
+│   │   ├── home/
+│   │   │   ├── main_nav_shell.dart               # 5-Tab Bottom Nav (Home, Elephants, Anti-Poaching, Community, Alerts)
+│   │   │   ├── home_dashboard_screen.dart        # 6. Top Plus Code bar, Alert stack, Road Check banner, Feed
+│   │   │   ├── road_check_route_screen.dart      # A-to-B safe route planner with crossing/medical pins
+│   │   │   └── widgets/
+│   │   │       ├── active_alerts_stack.dart      # Swipeable top 3 urgent nearby alerts
+│   │   │       ├── empty_alerts_card.dart        # Calm jungle graphic: "No active alerts nearby"
+│   │   │       └── quick_sos_bottom_sheet.dart   # 7. FAB modal with 3 swipe bars -&gt; instant camera trigger
+│   │   │
+│   │   ├── elephants/
+│   │   │   ├── elephants_feed_screen.dart        # 8. Filter tabs (All/Medical/Road) + verified incident cards
+│   │   │   ├── report_elephant_form_screen.dart  # 9. Category-first form, conditional photo, road-snapped map pin
+│   │   │   └── widgets/
+│   │   │       └── confirm_submit_dialog.dart    # "Confirm details are accurate and safe for wildlife?"
+│   │   │
+│   │   ├── anti_poaching/
+│   │   │   ├── anti_poaching_feed_screen.dart    # 10. High-priority anonymous feed (No Reject button)
+│   │   │   ├── report_poaching_form_screen.dart  # 11. Mandatory top photo box + Identity selector
+│   │   │   └── widgets/
+│   │   │       └── identity_selector_widget.dart # Real Name / Anonymous / Auto-saved Nickname input
+│   │   │
+│   │   ├── incident_details/
+│   │   │   ├── post_details_screen.dart          # 12. Unified detail view, author line, "Verify Presence" CTA
+│   │   │   └── widgets/
+│   │   │       └── proximity_context_banner.dart # Amber "Be Aware" or Green/Blue "You are near, assist" banner
+│   │   │
+│   │   ├── driver_warning/
+│   │   │   └── fullscreen_driver_alert.dart      # 13. Deep Slate (#0F172A) overlay, "500m Ahead", Swipe to Dismiss
+│   │   │
+│   │   ├── community/
+│   │   │   ├── community_feed_screen.dart        # 14. Conservation stories, thumbnails, heart counters, Pen FAB
+│   │   │   └── add_community_post_screen.dart    # 15. Title, multi-select category chips, photo picker, Publish
+│   │   │
+│   │   └── account/
+│   │       ├── account_settings_screen.dart      # 16. Grouped cards: Profile, Warnings toggle, "Buy Us a Coffee ☕"
+│   │       ├── my_submissions_screen.dart        # 17. Centralized history (Verified, Saved to Outbox, Resolved)
+│   │       └── offline_outbox_status_screen.dart # 18. Signal strength progress &amp; 2-hr auto-submit queue view
+│   │
+│   └── features_admin/                           # 👨‍💻 DEV B (Logic) + DEV A (UI): 6 Admin Portal Screens
+│       ├── auth/
+│       │   └── admin_login_screen.dart           # 1. Dark Navy (#0F172A) Official ID &amp; Password login
+│       ├── dashboard/
+│       │   └── moderation_dashboard_screen.dart  # 2. 4 Quick-Stat cards, live cluster map, unverified queue
+│       ├── queue/
+│       │   ├── incident_queue_screen.dart        # 3. High-density master list with 1-tap Verify &amp; Resolve icons
+│       │   └── incident_verify_detail_screen.dart# 4. Evidence view, Reporter Trust %, Sticky Approve/Resolve/Reject bar
+│       ├── broadcast/
+│       │   └── create_broadcast_screen.dart      # 5. Push official update to Feed, Banner, or Driver Alert
+│       └── users/
+│           └── user_trust_management_screen.dart # 6. Reporter list, Trust Score bar (0-100%), Mute/Ban/Trust menu
+│
+├── test/                                         # Automated Unit &amp; Widget Tests
+│   ├── services/
+│   │   └── time_expiry_test.dart                 # Tests 2-hour road crossing outbox expiration logic
+│   └── widgets/
+│       └── swipe_slider_test.dart
+│
+├── .env.example                                  # Template for API keys (Committed to Git)
+├── .gitignore                                    # Ignores .env, build/, and local Hive boxes
+├── analysis_options.yaml                         # Strict Flutter lint rules
+└── pubspec.yaml                                  # 🔒 LOCKED dependencies &amp; font/asset declarations</pre></div>
     </div>
   </section>
 
@@ -835,6 +1012,12 @@ $('#btnCopy').onclick = async () => {
   try { await navigator.clipboard.writeText(t); }
   catch(e){ const ta = document.createElement('textarea'); ta.value = t; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
   toast('Copied AGENT_RULES.md');
+};
+$('#btnCopyTree').onclick = async () => {
+  const t = $('#tree').textContent;
+  try { await navigator.clipboard.writeText(t); }
+  catch(e){ const ta = document.createElement('textarea'); ta.value = t; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  toast('Copied file structure');
 };
 $('#btnReset').onclick = () => $('#resetDlg').showModal();
 $('#dlgCancel').onclick = () => $('#resetDlg').close();
